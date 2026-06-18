@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>تطبيق المطار — شاهد وحمّل</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -59,35 +59,49 @@
     }
     @keyframes twinkle { 0%,100%{opacity:.15} 50%{opacity:.75} }
 
-    /* ── main container: video frame + bottom sheet ── */
-    .app-frame {
+    /* ── Galaxy S8 frame (148.9 x 68.1 mm) ── */
+    .phone-frame {
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 400px;        /* mobile frame width */
-      height: 100vh;
-      max-height: 780px;       /* typical phone height */
+      max-width: 360px;        /* approx width in px for S8 proportion */
+      aspect-ratio: 148.9 / 68.1; /* exact S8 ratio */
+      background: #0d1a2b;
+      border-radius: 38px;      /* rounded corners like S8 */
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 2px rgba(255,255,255,0.05);
+      padding: 12px 8px 12px 8px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 12px 12px 0 12px;
-      margin: 0 auto;
-      pointer-events: none;    /* allow clicks on children */
+      pointer-events: none;
+      transition: all 0.2s;
     }
-    .app-frame > * { pointer-events: auto; }
+    .phone-frame > * { pointer-events: auto; }
 
-    /* ── video stage (smaller, centered) ── */
+    /* inner container to hold video + sheet */
+    .app-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+      overflow: hidden;
+      border-radius: 28px;      /* inner radius matches phone frame */
+      background: transparent;
+    }
+
+    /* ── video stage (fits inside S8 frame) ── */
     .video-stage {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 9;    /* classic video ratio */
+      aspect-ratio: 16 / 9;
       background: #000;
-      border-radius: 24px;
+      border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       flex-shrink: 0;
-      margin-bottom: 12px;
     }
     #mainVideo {
       width: 100%;
@@ -95,7 +109,6 @@
       object-fit: cover;
       display: block;
     }
-    /* subtle scrim over video for readability */
     .video-scrim {
       position: absolute; inset:0; z-index:2; pointer-events:none;
       background:
@@ -105,36 +118,36 @@
     /* ── top status bar (departure board) ── */
     .board {
       position: absolute;
-      top: 12px;
+      top: 8px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 30;
       display: flex;
       align-items: center;
       gap: 0;
-      border-radius: 16px;
+      border-radius: 14px;
       overflow: hidden;
       background: var(--glass);
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
       border: 1px solid var(--glass-border);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
       pointer-events: none;
       white-space: nowrap;
     }
     .board-seg {
-      padding: 8px 14px;
+      padding: 6px 12px;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: .7rem;
-      letter-spacing: .06em;
+      font-size: .6rem;
+      letter-spacing: .04em;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
-    .board-seg.label { color: var(--text-faint); border-left: 1px solid rgba(255,255,255,0.1); }
+    .board-seg.label { color: var(--text-faint); border-left: 1px solid rgba(255,255,255,0.08); }
     .board-seg.status { color: var(--runway); font-weight: 600; }
     .board-dot {
-      width: 6px; height: 6px; border-radius: 50%; background: var(--runway);
+      width: 5px; height: 5px; border-radius: 50%; background: var(--runway);
       box-shadow: 0 0 8px var(--runway);
       animation: pulseDot 1.4s ease-in-out infinite;
     }
@@ -150,24 +163,24 @@
       100%{ opacity:1; transform:rotateX(0) translateY(0); filter:blur(0); }
     }
 
-    /* ── SOUND FALLBACK (small) ── */
+    /* ── SOUND FALLBACK ── */
     .sound-fallback {
       position: absolute;
-      bottom: 12px;
+      bottom: 10px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 30;
       display: none;
       align-items: center;
-      gap: 8px;
-      padding: 6px 16px;
+      gap: 6px;
+      padding: 5px 14px;
       border-radius: 50px;
       background: var(--glass-bright);
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
       border: 1px solid var(--glass-border-bright);
-      box-shadow: 0 6px 24px rgba(0,0,0,0.4);
-      font-size: .75rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      font-size: .65rem;
       color: var(--text);
       cursor: pointer;
       animation: fadeIn .4s ease;
@@ -177,136 +190,131 @@
     @keyframes fadeIn { from{ opacity:0; transform:translate(-50%, 6px); } to{ opacity:1; transform:translate(-50%,0); } }
     .sound-fallback i { color: var(--horizon); }
 
-    /* ── BOTTOM SHEET (smaller, compact) ── */
+    /* ── BOTTOM SHEET (compact, fits S8) ── */
     .sheet {
       width: 100%;
       flex-shrink: 0;
-      margin-top: auto;
-      margin-bottom: 8px;
       pointer-events: none;
+      margin-top: 4px;
     }
     .sheet-inner {
       width: 100%;
       pointer-events: auto;
-      border-radius: 24px 24px 20px 20px;
+      border-radius: 18px 18px 16px 16px;
       background: var(--glass);
       backdrop-filter: var(--blur-heavy);
       -webkit-backdrop-filter: var(--blur-heavy);
       border: 1px solid var(--glass-border);
       box-shadow:
-        0 -8px 40px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(255,255,255,0.22),
+        0 -6px 30px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.18),
         inset 0 -1px 0 rgba(255,255,255,0.04);
-      padding: 14px 18px 18px 18px;
+      padding: 10px 14px 14px 14px;
       position: relative;
       overflow: hidden;
-      transition: padding .3s ease;
     }
     .sheet-inner::before {
       content:''; position:absolute; top:0; left:0; right:0; height:1px;
-      background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
     }
     .sheet-grip {
-      width: 34px; height: 4px; border-radius: 4px;
-      background: rgba(255,255,255,0.2);
-      margin: 0 auto 12px;
+      width: 28px; height: 3px; border-radius: 4px;
+      background: rgba(255,255,255,0.15);
+      margin: 0 auto 8px;
     }
 
     /* watching state */
-    .state-watching { display: flex; flex-direction: column; gap: 8px; }
+    .state-watching { display: flex; flex-direction: column; gap: 6px; }
     .watching-row {
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 10px;
     }
     .watching-icon {
-      width: 34px; height: 34px; border-radius: 12px; flex-shrink: 0;
+      width: 28px; height: 28px; border-radius: 10px; flex-shrink: 0;
       background: rgba(255,138,92,0.14);
-      border: 1px solid rgba(255,138,92,0.25);
+      border: 1px solid rgba(255,138,92,0.2);
       display: flex; align-items: center; justify-content: center;
-      color: var(--horizon); font-size: .9rem;
+      color: var(--horizon); font-size: .8rem;
     }
     .watching-text { flex: 1; }
     .watching-title {
-      font-size: .85rem; font-weight: 600; color: var(--text); margin-bottom: 1px;
+      font-size: .75rem; font-weight: 600; color: var(--text); margin-bottom: 0px;
     }
     .watching-sub {
-      font-size: .7rem; color: var(--text-dim); line-height: 1.3;
+      font-size: .6rem; color: var(--text-dim); line-height: 1.2;
     }
     .progress-track {
-      position: relative; height: 4px; border-radius: 4px;
+      position: relative; height: 3px; border-radius: 3px;
       background: rgba(255,255,255,0.1);
       overflow: hidden;
     }
     .progress-fill {
       position: absolute; inset:0 auto 0 0; width:0%;
       background: linear-gradient(90deg, var(--horizon), var(--runway));
-      border-radius: 4px;
+      border-radius: 3px;
       transition: width .15s linear;
     }
     .progress-meta {
       display: flex; justify-content: space-between;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: .6rem; color: var(--text-faint); letter-spacing: .04em;
+      font-size: .5rem; color: var(--text-faint); letter-spacing: .04em;
     }
 
     /* ready state (download) */
     .state-ready {
-      display: none; flex-direction: column; gap: 12px;
+      display: none; flex-direction: column; gap: 8px;
       text-align: right;
     }
-    .state-ready.show { display: flex; animation: sheetReveal .5s cubic-bezier(.2,.8,.2,1); }
+    .state-ready.show { display: flex; animation: sheetReveal .45s cubic-bezier(.2,.8,.2,1); }
     @keyframes sheetReveal {
-      0%{ opacity:0; transform:translateY(12px); filter:blur(4px); }
+      0%{ opacity:0; transform:translateY(10px); filter:blur(4px); }
       100%{ opacity:1; transform:translateY(0); filter:blur(0); }
     }
     .ready-row {
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 10px;
     }
     .ready-icon {
-      width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
       background: rgba(123,232,164,0.14);
-      border: 1px solid rgba(123,232,164,0.3);
+      border: 1px solid rgba(123,232,164,0.25);
       display: flex; align-items: center; justify-content: center;
-      color: #7be8a4; font-size: 1rem;
+      color: #7be8a4; font-size: .9rem;
     }
     .ready-title {
-      font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: 1px;
+      font-size: .8rem; font-weight: 700; color: var(--text); margin-bottom: 0px;
     }
     .ready-sub {
-      font-size: .7rem; color: var(--text-dim);
+      font-size: .6rem; color: var(--text-dim);
     }
 
     .download-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%; padding: 14px 18px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; padding: 10px 14px; border-radius: 14px;
       background: linear-gradient(135deg, rgba(255,138,92,0.95), rgba(255,209,102,0.95));
-      color: #1a1206; font-size: .9rem; font-weight: 700;
-      box-shadow: 0 8px 24px rgba(255,138,92,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+      color: #1a1206; font-size: .8rem; font-weight: 700;
+      box-shadow: 0 6px 18px rgba(255,138,92,0.3), inset 0 1px 0 rgba(255,255,255,0.3);
       transition: transform .2s, box-shadow .2s;
       text-decoration: none;
     }
-    .download-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,138,92,0.4); }
+    .download-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(255,138,92,0.4); }
     .download-btn:active { transform: translateY(0) scale(.98); }
 
     .replay-link {
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      font-size: .7rem; color: var(--text-dim);
-      padding: 4px; background: none; border: none;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      font-size: .6rem; color: var(--text-dim);
+      padding: 3px; background: none; border: none;
       cursor: pointer;
       width: 100%;
     }
     .replay-link:hover { color: var(--text); }
 
-    /* responsive tweaks */
-    @media (max-width: 440px) {
-      .app-frame { max-width: 100%; padding: 8px 8px 0 8px; }
-      .board-seg { padding: 6px 12px; font-size: .65rem; }
-      .board { top: 8px; }
-      .sheet-inner { padding: 12px 14px 16px; border-radius: 20px 20px 16px 16px; }
-      .watching-title { font-size: .8rem; }
+    /* responsive fine-tune for very small screens */
+    @media (max-width: 380px) {
+      .phone-frame { max-width: 320px; border-radius: 32px; padding: 10px 6px; }
+      .board-seg { padding: 5px 10px; font-size: .55rem; }
+      .sheet-inner { padding: 8px 10px 12px; border-radius: 16px 16px 12px 12px; }
     }
-    @media (min-height: 800px) {
-      .app-frame { max-height: 820px; }
-      .video-stage { aspect-ratio: 16 / 9; }
+    @media (min-width: 500px) {
+      .phone-frame { max-width: 400px; }
     }
     /* accessibility */
     a:focus-visible, button:focus-visible {
@@ -319,71 +327,73 @@
   <div class="sky"></div>
   <div class="stars" id="stars"></div>
 
-  <div class="app-frame">
-    <!-- VIDEO STAGE (smaller, centered) -->
-    <div class="video-stage">
-      <video id="mainVideo" playsinline webkit-playsinline preload="auto">
-        <source src="open_video.mp4" type="video/mp4">
-      </video>
-      <div class="video-scrim"></div>
+  <!-- Galaxy S8 frame -->
+  <div class="phone-frame">
+    <div class="app-inner">
+      <!-- VIDEO STAGE -->
+      <div class="video-stage">
+        <video id="mainVideo" playsinline webkit-playsinline preload="auto">
+          <source src="open_video.mp4" type="video/mp4">
+        </video>
+        <div class="video-scrim"></div>
 
-      <!-- departure board (inside video frame) -->
-      <div class="board" id="board">
-        <div class="board-seg label"><i class="fas fa-plane-departure"></i> العرض</div>
-        <div class="board-seg status" id="boardStatus">
-          <span class="board-dot"></span>
-          <span class="status-text" id="boardStatusText">يتم التشغيل</span>
-        </div>
-      </div>
-
-      <!-- sound fallback (inside video frame) -->
-      <div class="sound-fallback" id="soundFallback">
-        <i class="fas fa-volume-xmark"></i>
-        <span>اضغط لتشغيل الصوت</span>
-      </div>
-    </div>
-
-    <!-- BOTTOM SHEET (compact) -->
-    <div class="sheet">
-      <div class="sheet-inner">
-        <div class="sheet-grip"></div>
-
-        <!-- state: watching -->
-        <div class="state-watching" id="stateWatching">
-          <div class="watching-row">
-            <div class="watching-icon"><i class="fas fa-headphones"></i></div>
-            <div class="watching-text">
-              <div class="watching-title">يُرجى سماع الفيديو حتى النهاية</div>
-              <div class="watching-sub">سيظهر رابط التحميل بعد انتهاء العرض</div>
-            </div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-          <div class="progress-meta">
-            <span id="timeElapsed">٠:٠٠</span>
-            <span id="timeTotal">٠:٠٠</span>
+        <!-- departure board -->
+        <div class="board" id="board">
+          <div class="board-seg label"><i class="fas fa-plane-departure"></i> العرض</div>
+          <div class="board-seg status" id="boardStatus">
+            <span class="board-dot"></span>
+            <span class="status-text" id="boardStatusText">يتم التشغيل</span>
           </div>
         </div>
 
-        <!-- state: ready (download) -->
-        <div class="state-ready" id="stateReady">
-          <div class="ready-row">
-            <div class="ready-icon"><i class="fas fa-circle-check"></i></div>
-            <div>
-              <div class="ready-title">جاهز للتحميل</div>
-              <div class="ready-sub">حمّل التطبيق الآن وابدأ رحلتك</div>
+        <!-- sound fallback -->
+        <div class="sound-fallback" id="soundFallback">
+          <i class="fas fa-volume-xmark"></i>
+          <span>اضغط لتشغيل الصوت</span>
+        </div>
+      </div>
+
+      <!-- BOTTOM SHEET -->
+      <div class="sheet">
+        <div class="sheet-inner">
+          <div class="sheet-grip"></div>
+
+          <!-- watching -->
+          <div class="state-watching" id="stateWatching">
+            <div class="watching-row">
+              <div class="watching-icon"><i class="fas fa-headphones"></i></div>
+              <div class="watching-text">
+                <div class="watching-title">يُرجى سماع الفيديو حتى النهاية</div>
+                <div class="watching-sub">سيظهر رابط التحميل بعد انتهاء العرض</div>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-meta">
+              <span id="timeElapsed">٠:٠٠</span>
+              <span id="timeTotal">٠:٠٠</span>
             </div>
           </div>
-          <!-- ⬇️ ضع رابط تحميل التطبيق هنا ⬇️ -->
-          <a href="#" id="downloadLink" class="download-btn" target="_blank" rel="noopener">
-            <i class="fas fa-arrow-down-to-line"></i>
-            تحميل التطبيق
-          </a>
-          <button class="replay-link" id="replayBtn">
-            <i class="fas fa-rotate-left"></i>
-            إعادة مشاهدة الفيديو
-          </button>
+
+          <!-- ready -->
+          <div class="state-ready" id="stateReady">
+            <div class="ready-row">
+              <div class="ready-icon"><i class="fas fa-circle-check"></i></div>
+              <div>
+                <div class="ready-title">جاهز للتحميل</div>
+                <div class="ready-sub">حمّل التطبيق الآن وابدأ رحلتك</div>
+              </div>
+            </div>
+            <a href="#" id="downloadLink" class="download-btn" target="_blank" rel="noopener">
+              <i class="fas fa-arrow-down-to-line"></i>
+              تحميل التطبيق
+            </a>
+            <button class="replay-link" id="replayBtn">
+              <i class="fas fa-rotate-left"></i>
+              إعادة مشاهدة الفيديو
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -402,7 +412,6 @@
       const soundFallback = document.getElementById('soundFallback');
       const replayBtn = document.getElementById('replayBtn');
 
-      // Arabic-Indic digits
       const arDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
       function toArabicNum(str) {
         return str.replace(/[0-9]/g, d => arDigits[d]);
@@ -456,7 +465,6 @@
         video.play().catch(() => {});
       });
 
-      // Autoplay with sound fallback
       function attemptAutoplay() {
         video.muted = false;
         const playPromise = video.play();
