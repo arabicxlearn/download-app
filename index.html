@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>تطبيق المطار — شاهد وحمّل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --sky-deep:#0a1626;
+  --sky-mid:#142b46;
+  --sky-edge:#1c3a5e;
+  --horizon:#ff8a5c;
+  --horizon-dim:rgba(255,138,92,0.35);
+  --runway:#ffd166;
+  --text:#eaf1fb;
+  --text-dim:#92a8c4;
+  --text-faint:#5d7392;
+  --glass:rgba(255,255,255,0.07);
+  --glass-bright:rgba(255,255,255,0.14);
+  --glass-border:rgba(255,255,255,0.16);
+  --glass-border-bright:rgba(255,255,255,0.3);
+  --blur:saturate(180%) blur(24px);
+  --blur-heavy:saturate(200%) blur(40px);
+}
+html,body{height:100%;}
+body{
+  font-family:'IBM Plex Sans Arabic',sans-serif;
+  background:var(--sky-deep);
+  color:var(--text);
+  overflow:hidden;
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+}
+
+/* ═══ BACKDROP SKY (visible behind/around video edges + while loading) ═══ */
+.sky{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 100%, var(--horizon-dim) 0%, transparent 55%),
+    linear-gradient(180deg, var(--sky-deep) 0%, var(--sky-mid) 55%, var(--sky-edge) 100%);
+}
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.star{
+  position:absolute;border-radius:50%;background:#fff;
+  animation:twinkle 3.4s ease-in-out infinite;
+}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.75}}
+
+/* ═══ VIDEO LAYER ═══ */
+.video-stage{
+  position:fixed;inset:0;z-index:1;
+  display:flex;align-items:center;justify-content:center;
+  background:#000;
+}
+#mainVideo{
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* dark gradient so glass UI stays legible over bright footage */
+.video-scrim{
+  position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(8,14,24,0.65) 0%, rgba(8,14,24,0.05) 22%, rgba(8,14,24,0.05) 70%, rgba(8,14,24,0.75) 100%);
+}
+
+/* ═══ TOP STATUS — departure-board style ═══ */
+.board{
+  position:fixed;top:max(18px,env(safe-area-inset-top));left:50%;
+  transform:translateX(-50%);
+  z-index:30;
+  display:flex;align-items:center;gap:0;
+  border-radius:16px;overflow:hidden;
+  background:var(--glass);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-border);
+  box-shadow:0 8px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+.board-seg{
+  padding:10px 18px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.78rem;letter-spacing:.08em;
+  display:flex;align-items:center;gap:8px;
+  white-space:nowrap;
+}
+.board-seg.label{color:var(--text-faint);border-left:1px solid rgba(255,255,255,0.1);}
+.board-seg.status{color:var(--runway);font-weight:600;position:relative;}
+.board-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--runway);
+  box-shadow:0 0 8px var(--runway);
+  animation:pulseDot 1.4s ease-in-out infinite;
+}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.3}}
+.board-seg.status.done{color:#7be8a4;}
+.board-seg.status.done .board-dot{background:#7be8a4;box-shadow:0 0 8px #7be8a4;animation:none;}
+
+/* flip transition when status changes */
+.board-seg.status .status-text{
+  display:inline-block;
+  animation:flipIn .5s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes flipIn{
+  0%{opacity:0;transform:rotateX(70deg) translateY(-4px);filter:blur(2px);}
+  100%{opacity:1;transform:rotateX(0) translateY(0);filter:blur(0);}
+}
+
+/* ═══ BOTTOM SHEET — liquid glass panel ═══ */
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  display:flex;justify-content:center;
+  padding:0 18px max(22px,env(safe-area-inset-bottom));
+  pointer-events:none;
+}
+.sheet-inner{
+  width:100%;max-width:480px;
+  pointer-events:auto;
+  border-radius:28px 28px 22px 22px;
+  background:var(--glass);
+  backdrop-filter:var(--blur-heavy);-webkit-backdrop-filter:var(--blur-heavy);
+  border:1px solid var(--glass-border);
+  box-shadow:
+    0 -10px 50px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -1px 0 rgba(255,255,255,0.04);
+  padding:22px 22px calc(22px + env(safe-area-inset-bottom,0px));
+  position:relative;
+  overflow:hidden;
+  transition:padding .4s ease;
+}
+.sheet-inner::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(to right,transparent,rgba(255,255,255,0.5),transparent);
+}
+.sheet-grip{
+  width:38px;height:4px;border-radius:4px;
+  background:rgba(255,255,255,0.25);
+  margin:0 auto 16px;
+}
+
+/* ── state: watching ── */
+.state-watching{display:flex;flex-direction:column;gap:14px;}
+.watching-row{display:flex;align-items:center;gap:14px;}
+.watching-icon{
+  width:42px;height:42px;border-radius:13px;flex-shrink:0;
+  background:rgba(255,138,92,0.14);
+  border:1px solid rgba(255,138,92,0.3);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--horizon);font-size:1.05rem;
+}
+.watching-text{flex:1;}
+.watching-title{font-size:.98rem;font-weight:600;color:var(--text);margin-bottom:2px;}
+.watching-sub{font-size:.82rem;color:var(--text-dim);}
+
+/* progress track */
+.progress-track{
+  position:relative;height:5px;border-radius:5px;
+  background:rgba(255,255,255,0.12);
+  overflow:hidden;
+}
+.progress-fill{
+  position:absolute;inset:0 auto 0 0;width:0%;
+  background:linear-gradient(90deg,var(--horizon),var(--runway));
+  border-radius:5px;
+  transition:width .15s linear;
+}
+.progress-meta{
+  display:flex;justify-content:space-between;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem;color:var(--text-faint);letter-spacing:.04em;
+}
+
+/* ── state: ready (download) ── */
+.state-ready{
+  display:none;flex-direction:column;gap:16px;
+  text-align:right;
+}
+.state-ready.show{display:flex;animation:sheetReveal .55s cubic-bezier(.2,.8,.2,1);}
+@keyframes sheetReveal{
+  0%{opacity:0;transform:translateY(14px);filter:blur(6px);}
+  100%{opacity:1;transform:translateY(0);filter:blur(0);}
+}
+.ready-row{display:flex;align-items:center;gap:14px;}
+.ready-icon{
+  width:46px;height:46px;border-radius:14px;flex-shrink:0;
+  background:rgba(123,232,164,0.14);
+  border:1px solid rgba(123,232,164,0.35);
+  display:flex;align-items:center;justify-content:center;
+  color:#7be8a4;font-size:1.2rem;
+}
+.ready-title{font-size:1.08rem;font-weight:700;color:var(--text);margin-bottom:3px;}
+.ready-sub{font-size:.85rem;color:var(--text-dim);}
+
+/* download link placeholder — where the user pastes their link */
+.download-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:16px 20px;border-radius:18px;
+  background:linear-gradient(135deg, rgba(255,138,92,0.95), rgba(255,209,102,0.95));
+  color:#1a1206;font-size:1.02rem;font-weight:700;
+  box-shadow:0 10px 30px rgba(255,138,92,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition:transform .2s, box-shadow .2s, filter .2s;
+}
+.download-btn:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(255,138,92,0.4), inset 0 1px 0 rgba(255,255,255,0.5);}
+.download-btn:active{transform:translateY(0) scale(.98);filter:brightness(.96);}
+.download-btn i{font-size:1.1em;}
+
+.replay-link{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  font-size:.82rem;color:var(--text-dim);
+  padding:6px;
+}
+.replay-link:hover{color:var(--text);}
+.replay-link i{font-size:.85em;}
+
+/* ═══ MUTE / SOUND FALLBACK BADGE (only shown if autoplay-with-sound got blocked) ═══ */
+.sound-fallback{
+  position:fixed;top:max(78px,calc(env(safe-area-inset-top) + 78px));left:50%;
+  transform:translateX(-50%);
+  z-index:30;display:none;align-items:center;gap:9px;
+  padding:9px 18px;border-radius:50px;
+  background:var(--glass-bright);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-border-bright);
+  box-shadow:0 6px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+  font-size:.84rem;color:var(--text);cursor:pointer;
+  animation:fadeIn .4s ease;
+}
+.sound-fallback.show{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translate(-50%,-6px);}to{opacity:1;transform:translate(-50%,0);}}
+.sound-fallback i{color:var(--horizon);}
+
+/* ═══ responsive ═══ */
+@media(max-width:420px){
+  .board-seg{padding:9px 13px;font-size:.7rem;}
+  .sheet-inner{padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));border-radius:24px 24px 18px 18px;}
+}
+@media(min-width:900px){
+  .sheet{padding-bottom:max(34px,env(safe-area-inset-bottom));}
+  .sheet-inner{max-width:520px;}
+}
+
+/* visible keyboard focus for accessibility */
+a:focus-visible, button:focus-visible{
+  outline:2px solid var(--runway);
+  outline-offset:3px;
+}
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<div class="stars" id="stars"></div>
+
+<!-- ═══ VIDEO ═══ -->
+<div class="video-stage">
+  <video id="mainVideo" playsinline webkit-playsinline preload="auto">
+    <source src="open_video.mp4" type="video/mp4">
+  </video>
+</div>
+<div class="video-scrim"></div>
+
+<!-- ═══ DEPARTURE-BOARD STATUS ═══ -->
+<div class="board" id="board">
+  <div class="board-seg label"><i class="fas fa-plane-departure"></i> العرض</div>
+  <div class="board-seg status" id="boardStatus">
+    <span class="board-dot"></span>
+    <span class="status-text" id="boardStatusText">يتم التشغيل</span>
+  </div>
+</div>
+
+<!-- ═══ SOUND FALLBACK (hidden unless autoplay-with-sound is blocked) ═══ -->
+<div class="sound-fallback" id="soundFallback">
+  <i class="fas fa-volume-xmark"></i>
+  <span>اضغط لتشغيل الصوت</span>
+</div>
+
+<!-- ═══ BOTTOM GLASS SHEET ═══ -->
+<div class="sheet">
+  <div class="sheet-inner">
+    <div class="sheet-grip"></div>
+
+    <!-- state 1: watching -->
+    <div class="state-watching" id="stateWatching">
+      <div class="watching-row">
+        <div class="watching-icon"><i class="fas fa-headphones"></i></div>
+        <div class="watching-text">
+          <div class="watching-title">يُرجى سماع الفيديو حتى النهاية</div>
+          <div class="watching-sub">سيظهر لك رابط تحميل التطبيق بعد انتهاء العرض مباشرة</div>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-meta">
+        <span id="timeElapsed">٠:٠٠</span>
+        <span id="timeTotal">٠:٠٠</span>
+      </div>
+    </div>
+
+    <!-- state 2: ready to download -->
+    <div class="state-ready" id="stateReady">
+      <div class="ready-row">
+        <div class="ready-icon"><i class="fas fa-circle-check"></i></div>
+        <div>
+          <div class="ready-title">جاهز للتحميل</div>
+          <div class="ready-sub">حمّل التطبيق الآن وابدأ رحلتك</div>
+        </div>
+      </div>
+
+      <!-- ⬇️ ضع رابط تحميل التطبيق هنا في خاصية href ⬇️ -->
+      <a href="#" id="downloadLink" class="download-btn" target="_blank" rel="noopener">
+        <i class="fas fa-arrow-down-to-line"></i>
+        تحميل التطبيق
+      </a>
+
+      <button class="replay-link" id="replayBtn">
+        <i class="fas fa-rotate-left"></i>
+        إعادة مشاهدة الفيديو
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const video = document.getElementById('mainVideo');
+const progressFill = document.getElementById('progressFill');
+const timeElapsed = document.getElementById('timeElapsed');
+const timeTotal = document.getElementById('timeTotal');
+const stateWatching = document.getElementById('stateWatching');
+const stateReady = document.getElementById('stateReady');
+const boardStatus = document.getElementById('boardStatus');
+const boardStatusText = document.getElementById('boardStatusText');
+const soundFallback = document.getElementById('soundFallback');
+const replayBtn = document.getElementById('replayBtn');
+
+// ── Arabic-Indic digit formatting for the timer ──
+const arDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+function toArabicNum(str){
+  return str.replace(/[0-9]/g, d => arDigits[d]);
+}
+function formatTime(sec){
+  if(!isFinite(sec) || sec < 0) sec = 0;
+  const m = Math.floor(sec/60);
+  const s = Math.floor(sec%60);
+  return toArabicNum(`${m}:${s.toString().padStart(2,'0')}`);
+}
+
+function setBoardStatus(text, done){
+  boardStatusText.style.animation = 'none';
+  requestAnimationFrame(()=>{
+    boardStatusText.textContent = text;
+    boardStatusText.style.animation = '';
+  });
+  boardStatus.classList.toggle('done', !!done);
+}
+
+function showReadyState(){
+  stateWatching.style.display = 'none';
+  stateReady.classList.add('show');
+  setBoardStatus('انتهى — جاهز', true);
+}
+
+function showWatchingState(){
+  stateReady.classList.remove('show');
+  stateWatching.style.display = 'flex';
+  setBoardStatus('يتم التشغيل', false);
+}
+
+video.addEventListener('loadedmetadata', ()=>{
+  timeTotal.textContent = formatTime(video.duration);
+});
+
+video.addEventListener('timeupdate', ()=>{
+  if(video.duration){
+    const pct = (video.currentTime / video.duration) * 100;
+    progressFill.style.width = pct + '%';
+  }
+  timeElapsed.textContent = formatTime(video.currentTime);
+});
+
+video.addEventListener('ended', showReadyState);
+
+replayBtn.addEventListener('click', ()=>{
+  showWatchingState();
+  video.currentTime = 0;
+  video.muted = false;
+  video.play().catch(()=>{});
+});
+
+// ── Autoplay with sound; gracefully fall back to muted if the browser blocks it ──
+function attemptAutoplay(){
+  video.muted = false;
+  const playPromise = video.play();
+  if(playPromise !== undefined){
+    playPromise.catch(()=>{
+      // Browser blocked audible autoplay — fall back to muted autoplay so the video still runs.
+      video.muted = true;
+      video.play().catch(()=>{});
+      soundFallback.classList.add('show');
+    });
+  }
+}
+
+soundFallback.addEventListener('click', ()=>{
+  video.muted = false;
+  video.play().catch(()=>{});
+  soundFallback.classList.remove('show');
+});
+
+window.addEventListener('DOMContentLoaded', attemptAutoplay);
+video.addEventListener('canplay', attemptAutoplay, {once:true});
+
+// ── ambient stars ──
+(function(){
+  const wrap = document.getElementById('stars');
+  for(let i=0;i<50;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random()*2 + 0.6;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*55}%;animation-delay:${Math.random()*3}s;animation-duration:${2.6+Math.random()*2.4}s;`;
+    wrap.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
