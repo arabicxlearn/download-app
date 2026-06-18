@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>تحميل تطبيق الظلال</title>
+<title>تطبيق الظلال — شاهد وحمّل</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,6 +25,7 @@
   --glass-border-bright:rgba(255,255,255,0.3);
   --blur:saturate(180%) blur(24px);
   --blur-heavy:saturate(200%) blur(40px);
+  --phone-scale:1;
 }
 html,body{height:100%;}
 body{
@@ -60,12 +61,14 @@ body{
   padding:max(86px,calc(env(safe-area-inset-top) + 70px)) 16px 150px;
 }
 
+/* base size is the "100%" reference; --phone-scale multiplies it uniformly,
+   so width/height/aspect-ratio never get distorted relative to each other */
 .phone{
   position:relative;
-  width:min(86vw, 300px);
-  height:min(76vh, 620px);
+  width:calc(min(86vw, 300px) * var(--phone-scale));
+  height:calc(min(76vh, 620px) * var(--phone-scale));
   aspect-ratio: 9/19.5;
-  max-height: 620px;
+  max-height: calc(620px * var(--phone-scale));
   background:#050608;
   border-radius:46px;
   padding:14px;
@@ -74,6 +77,7 @@ body{
     0 25px 70px rgba(0,0,0,0.65),
     0 8px 24px rgba(0,0,0,0.5),
     inset 0 0 0 1px rgba(255,255,255,0.04);
+  transition: width .35s cubic-bezier(.2,.8,.2,1), height .35s cubic-bezier(.2,.8,.2,1), max-height .35s cubic-bezier(.2,.8,.2,1);
 }
 .phone::before{
   /* side button accents for realism */
@@ -168,6 +172,38 @@ body{
 @keyframes flipIn{
   0%{opacity:0;transform:rotateX(70deg) translateY(-4px);filter:blur(2px);}
   100%{opacity:1;transform:rotateX(0) translateY(0);filter:blur(0);}
+}
+
+/* ═══ ZOOM CONTROLS — for shrinking/growing the phone in tight spaces ═══ */
+.zoom-controls{
+  position:fixed;
+  top:max(18px,env(safe-area-inset-top));
+  right:max(16px,env(safe-area-inset-right));
+  z-index:30;
+  display:flex;flex-direction:column;gap:6px;
+  border-radius:16px;overflow:hidden;
+  background:var(--glass);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-border);
+  box-shadow:0 8px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
+  padding:6px;
+}
+.zoom-btn{
+  width:34px;height:34px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  color:var(--text);font-size:.95rem;
+  transition:background .2s, transform .15s;
+}
+.zoom-btn:hover{background:rgba(255,255,255,0.14);}
+.zoom-btn:active{transform:scale(.92);}
+.zoom-btn:disabled{opacity:.35;pointer-events:none;}
+.zoom-reset{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.62rem;color:var(--text-faint);
+  text-align:center;padding-top:2px;
+  letter-spacing:.02em;
 }
 
 /* ═══ BOTTOM SHEET — liquid glass panel (compact) ═══ */
@@ -297,6 +333,7 @@ body{
   .board-seg{padding:9px 13px;font-size:.7rem;}
   .sheet-inner{padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));border-radius:20px 20px 16px 16px;}
   .video-stage{padding:max(80px,calc(env(safe-area-inset-top) + 64px)) 16px 130px;}
+  .zoom-controls{right:max(10px,env(safe-area-inset-right));}
 }
 @media(min-width:900px){
   .sheet{padding-bottom:max(26px,env(safe-area-inset-bottom));}
@@ -316,7 +353,7 @@ a:focus-visible, button:focus-visible{
 
 <!-- ═══ PHONE FRAME + VIDEO ═══ -->
 <div class="video-stage">
-  <div class="phone">
+  <div class="phone" id="phone">
     <div class="phone-screen">
       <div class="phone-notch"></div>
       <video id="mainVideo" playsinline webkit-playsinline preload="auto">
@@ -335,6 +372,13 @@ a:focus-visible, button:focus-visible{
     <span class="board-dot"></span>
     <span class="status-text" id="boardStatusText">يتم التشغيل</span>
   </div>
+</div>
+
+<!-- ═══ ZOOM CONTROLS (resize phone, same aspect ratio) ═══ -->
+<div class="zoom-controls">
+  <button class="zoom-btn" id="zoomInBtn" aria-label="تكبير"><i class="fas fa-plus"></i></button>
+  <div class="zoom-reset" id="zoomLabel">١٠٠٪</div>
+  <button class="zoom-btn" id="zoomOutBtn" aria-label="تصغير"><i class="fas fa-minus"></i></button>
 </div>
 
 <!-- ═══ SOUND FALLBACK ═══ -->
@@ -376,7 +420,6 @@ a:focus-visible, button:focus-visible{
         </div>
       </div>
 
-      <!-- ⬇️ ضع رابط تحميل التطبيق هنا في خاصية href ⬇️ -->
       <a href="https://www.mediafire.com/file/puokwlwg34tsvpw/Elzelal.apk/file" id="downloadLink" class="download-btn" target="_blank" rel="noopener">
         <i class="fas fa-arrow-down-to-line"></i>
         تحميل التطبيق
@@ -490,6 +533,39 @@ video.addEventListener('canplay', attemptAutoplay, {once:true});
     s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*55}%;animation-delay:${Math.random()*3}s;animation-duration:${2.6+Math.random()*2.4}s;`;
     wrap.appendChild(s);
   }
+})();
+
+// ── PHONE ZOOM: shrink/grow the whole phone frame uniformly (same aspect ratio always) ──
+(function(){
+  const root = document.documentElement;
+  const zoomInBtn = document.getElementById('zoomInBtn');
+  const zoomOutBtn = document.getElementById('zoomOutBtn');
+  const zoomLabel = document.getElementById('zoomLabel');
+
+  const MIN_SCALE = 0.6;   // smallest: 60% of base size
+  const MAX_SCALE = 1.5;   // largest: 150% of base size
+  const STEP = 0.1;
+  let scale = 1;
+
+  function applyScale(){
+    // clamp
+    scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
+    root.style.setProperty('--phone-scale', scale.toFixed(2));
+    zoomLabel.textContent = toArabicNum(Math.round(scale*100) + '٪');
+    zoomInBtn.disabled = scale >= MAX_SCALE;
+    zoomOutBtn.disabled = scale <= MIN_SCALE;
+  }
+
+  zoomInBtn.addEventListener('click', ()=>{
+    scale += STEP;
+    applyScale();
+  });
+  zoomOutBtn.addEventListener('click', ()=>{
+    scale -= STEP;
+    applyScale();
+  });
+
+  applyScale();
 })();
 </script>
 </body>
