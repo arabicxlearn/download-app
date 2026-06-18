@@ -59,40 +59,39 @@
     }
     @keyframes twinkle { 0%,100%{opacity:.15} 50%{opacity:.75} }
 
-    /* ── Galaxy S8 frame (148.9 x 68.1 mm) ── */
+    /* ── هاتف طويل (نسبة 9:19.5) ── */
     .phone-frame {
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 360px;        /* approx width in px for S8 proportion */
-      aspect-ratio: 148.9 / 68.1; /* exact S8 ratio */
+      max-width: 380px;
+      aspect-ratio: 9 / 19.5;    /* طويل ونحيف مثل الهواتف الحديثة */
+      max-height: 96vh;
       background: #0d1a2b;
-      border-radius: 38px;      /* rounded corners like S8 */
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 2px rgba(255,255,255,0.05);
-      padding: 12px 8px 12px 8px;
+      border-radius: 36px;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 2px rgba(255,255,255,0.04);
+      padding: 12px 8px 10px 8px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
       pointer-events: none;
       transition: all 0.2s;
     }
     .phone-frame > * { pointer-events: auto; }
 
-    /* inner container to hold video + sheet */
+    /* حاوية المحتوى (فيديو + كارد) */
     .app-inner {
       width: 100%;
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 6px;
+      justify-content: flex-start;  /* المحتوى يبدأ من الأعلى */
+      gap: 6px;                    /* مسافة صغيرة بين الفيديو والكارد */
       overflow: hidden;
-      border-radius: 28px;      /* inner radius matches phone frame */
+      border-radius: 28px;
       background: transparent;
     }
 
-    /* ── video stage (fits inside S8 frame) ── */
+    /* ── مشغل الفيديو (يعلو) ── */
     .video-stage {
       position: relative;
       width: 100%;
@@ -115,7 +114,7 @@
         linear-gradient(180deg, rgba(8,14,24,0.3) 0%, transparent 30%, transparent 70%, rgba(8,14,24,0.4) 100%);
     }
 
-    /* ── top status bar (departure board) ── */
+    /* ── شريط الحالة العلوي (لوحة المغادرة) ── */
     .board {
       position: absolute;
       top: 8px;
@@ -136,13 +135,13 @@
       white-space: nowrap;
     }
     .board-seg {
-      padding: 6px 12px;
+      padding: 5px 10px;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: .6rem;
+      font-size: .55rem;
       letter-spacing: .04em;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
     .board-seg.label { color: var(--text-faint); border-left: 1px solid rgba(255,255,255,0.08); }
     .board-seg.status { color: var(--runway); font-weight: 600; }
@@ -163,7 +162,7 @@
       100%{ opacity:1; transform:rotateX(0) translateY(0); filter:blur(0); }
     }
 
-    /* ── SOUND FALLBACK ── */
+    /* ── زر الصوت الاحتياطي (داخل الفيديو) ── */
     .sound-fallback {
       position: absolute;
       bottom: 10px;
@@ -173,14 +172,14 @@
       display: none;
       align-items: center;
       gap: 6px;
-      padding: 5px 14px;
+      padding: 4px 12px;
       border-radius: 50px;
       background: var(--glass-bright);
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
       border: 1px solid var(--glass-border-bright);
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      font-size: .65rem;
+      font-size: .6rem;
       color: var(--text);
       cursor: pointer;
       animation: fadeIn .4s ease;
@@ -190,12 +189,11 @@
     @keyframes fadeIn { from{ opacity:0; transform:translate(-50%, 6px); } to{ opacity:1; transform:translate(-50%,0); } }
     .sound-fallback i { color: var(--horizon); }
 
-    /* ── BOTTOM SHEET (compact, fits S8) ── */
+    /* ── الكارد السفلي (يلي الفيديو بمسافة بسيطة) ── */
     .sheet {
       width: 100%;
       flex-shrink: 0;
       pointer-events: none;
-      margin-top: 4px;
     }
     .sheet-inner {
       width: 100%;
@@ -206,7 +204,7 @@
       -webkit-backdrop-filter: var(--blur-heavy);
       border: 1px solid var(--glass-border);
       box-shadow:
-        0 -6px 30px rgba(0,0,0,0.5),
+        0 -4px 24px rgba(0,0,0,0.5),
         inset 0 1px 0 rgba(255,255,255,0.18),
         inset 0 -1px 0 rgba(255,255,255,0.04);
       padding: 10px 14px 14px 14px;
@@ -220,27 +218,27 @@
     .sheet-grip {
       width: 28px; height: 3px; border-radius: 4px;
       background: rgba(255,255,255,0.15);
-      margin: 0 auto 8px;
+      margin: 0 auto 6px;
     }
 
-    /* watching state */
-    .state-watching { display: flex; flex-direction: column; gap: 6px; }
+    /* حالة المشاهدة */
+    .state-watching { display: flex; flex-direction: column; gap: 5px; }
     .watching-row {
       display: flex; align-items: center; gap: 10px;
     }
     .watching-icon {
-      width: 28px; height: 28px; border-radius: 10px; flex-shrink: 0;
+      width: 26px; height: 26px; border-radius: 10px; flex-shrink: 0;
       background: rgba(255,138,92,0.14);
       border: 1px solid rgba(255,138,92,0.2);
       display: flex; align-items: center; justify-content: center;
-      color: var(--horizon); font-size: .8rem;
+      color: var(--horizon); font-size: .75rem;
     }
     .watching-text { flex: 1; }
     .watching-title {
-      font-size: .75rem; font-weight: 600; color: var(--text); margin-bottom: 0px;
+      font-size: .7rem; font-weight: 600; color: var(--text); margin-bottom: 0px;
     }
     .watching-sub {
-      font-size: .6rem; color: var(--text-dim); line-height: 1.2;
+      font-size: .55rem; color: var(--text-dim); line-height: 1.2;
     }
     .progress-track {
       position: relative; height: 3px; border-radius: 3px;
@@ -259,7 +257,7 @@
       font-size: .5rem; color: var(--text-faint); letter-spacing: .04em;
     }
 
-    /* ready state (download) */
+    /* حالة جاهز للتحميل */
     .state-ready {
       display: none; flex-direction: column; gap: 8px;
       text-align: right;
@@ -273,24 +271,24 @@
       display: flex; align-items: center; gap: 10px;
     }
     .ready-icon {
-      width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+      width: 30px; height: 30px; border-radius: 10px; flex-shrink: 0;
       background: rgba(123,232,164,0.14);
       border: 1px solid rgba(123,232,164,0.25);
       display: flex; align-items: center; justify-content: center;
-      color: #7be8a4; font-size: .9rem;
+      color: #7be8a4; font-size: .85rem;
     }
     .ready-title {
-      font-size: .8rem; font-weight: 700; color: var(--text); margin-bottom: 0px;
+      font-size: .75rem; font-weight: 700; color: var(--text); margin-bottom: 0px;
     }
     .ready-sub {
-      font-size: .6rem; color: var(--text-dim);
+      font-size: .55rem; color: var(--text-dim);
     }
 
     .download-btn {
       display: flex; align-items: center; justify-content: center; gap: 6px;
       width: 100%; padding: 10px 14px; border-radius: 14px;
       background: linear-gradient(135deg, rgba(255,138,92,0.95), rgba(255,209,102,0.95));
-      color: #1a1206; font-size: .8rem; font-weight: 700;
+      color: #1a1206; font-size: .75rem; font-weight: 700;
       box-shadow: 0 6px 18px rgba(255,138,92,0.3), inset 0 1px 0 rgba(255,255,255,0.3);
       transition: transform .2s, box-shadow .2s;
       text-decoration: none;
@@ -300,23 +298,23 @@
 
     .replay-link {
       display: flex; align-items: center; justify-content: center; gap: 5px;
-      font-size: .6rem; color: var(--text-dim);
+      font-size: .55rem; color: var(--text-dim);
       padding: 3px; background: none; border: none;
       cursor: pointer;
       width: 100%;
     }
     .replay-link:hover { color: var(--text); }
 
-    /* responsive fine-tune for very small screens */
-    @media (max-width: 380px) {
-      .phone-frame { max-width: 320px; border-radius: 32px; padding: 10px 6px; }
-      .board-seg { padding: 5px 10px; font-size: .55rem; }
-      .sheet-inner { padding: 8px 10px 12px; border-radius: 16px 16px 12px 12px; }
+    /* تحسينات للشاشات الصغيرة جداً */
+    @media (max-width: 400px) {
+      .phone-frame { max-width: 340px; border-radius: 30px; padding: 8px 4px; }
+      .board-seg { padding: 4px 8px; font-size: .5rem; }
+      .sheet-inner { padding: 8px 10px 12px; border-radius: 14px 14px 12px 12px; }
     }
-    @media (min-width: 500px) {
-      .phone-frame { max-width: 400px; }
+    @media (min-width: 600px) {
+      .phone-frame { max-width: 420px; }
     }
-    /* accessibility */
+    /* تسهيل الوصول */
     a:focus-visible, button:focus-visible {
       outline: 2px solid var(--runway);
       outline-offset: 2px;
@@ -327,17 +325,17 @@
   <div class="sky"></div>
   <div class="stars" id="stars"></div>
 
-  <!-- Galaxy S8 frame -->
+  <!-- إطار الهاتف الطويل -->
   <div class="phone-frame">
     <div class="app-inner">
-      <!-- VIDEO STAGE -->
+      <!-- مشغل الفيديو -->
       <div class="video-stage">
         <video id="mainVideo" playsinline webkit-playsinline preload="auto">
           <source src="open_video.mp4" type="video/mp4">
         </video>
         <div class="video-scrim"></div>
 
-        <!-- departure board -->
+        <!-- لوحة الحالة العلوية -->
         <div class="board" id="board">
           <div class="board-seg label"><i class="fas fa-plane-departure"></i> العرض</div>
           <div class="board-seg status" id="boardStatus">
@@ -346,19 +344,19 @@
           </div>
         </div>
 
-        <!-- sound fallback -->
+        <!-- زر الصوت الاحتياطي -->
         <div class="sound-fallback" id="soundFallback">
           <i class="fas fa-volume-xmark"></i>
           <span>اضغط لتشغيل الصوت</span>
         </div>
       </div>
 
-      <!-- BOTTOM SHEET -->
+      <!-- الكارد السفلي (يأتي بعد الفيديو بمسافة 6px) -->
       <div class="sheet">
         <div class="sheet-inner">
           <div class="sheet-grip"></div>
 
-          <!-- watching -->
+          <!-- حالة المشاهدة -->
           <div class="state-watching" id="stateWatching">
             <div class="watching-row">
               <div class="watching-icon"><i class="fas fa-headphones"></i></div>
@@ -376,7 +374,7 @@
             </div>
           </div>
 
-          <!-- ready -->
+          <!-- حالة جاهز للتحميل -->
           <div class="state-ready" id="stateReady">
             <div class="ready-row">
               <div class="ready-icon"><i class="fas fa-circle-check"></i></div>
@@ -385,6 +383,7 @@
                 <div class="ready-sub">حمّل التطبيق الآن وابدأ رحلتك</div>
               </div>
             </div>
+            <!-- ⬇️ ضع رابط تحميل التطبيق هنا ⬇️ -->
             <a href="#" id="downloadLink" class="download-btn" target="_blank" rel="noopener">
               <i class="fas fa-arrow-down-to-line"></i>
               تحميل التطبيق
@@ -486,7 +485,7 @@
       window.addEventListener('DOMContentLoaded', attemptAutoplay);
       video.addEventListener('canplay', attemptAutoplay, { once: true });
 
-      // stars
+      // نجوم الخلفية
       const wrap = document.getElementById('stars');
       for (let i = 0; i < 40; i++) {
         const s = document.createElement('div');
