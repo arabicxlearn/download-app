@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>تحميل تطبيق الظلال</title>
+  <title>تطبيق المطار — شاهد وحمّل</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -59,13 +59,13 @@
     }
     @keyframes twinkle { 0%,100%{opacity:.15} 50%{opacity:.75} }
 
-    /* ── هاتف طويل (نسبة 9:19.5) ── */
+    /* ── إطار هاتف طويل (نسبة 9:19.5) ── */
     .phone-frame {
       position: relative;
       z-index: 10;
       width: 100%;
       max-width: 380px;
-      aspect-ratio: 9 / 19.5;    /* طويل ونحيف مثل الهواتف الحديثة */
+      aspect-ratio: 9 / 19.5;
       max-height: 96vh;
       background: #0d1a2b;
       border-radius: 36px;
@@ -74,38 +74,35 @@
       display: flex;
       flex-direction: column;
       pointer-events: none;
-      transition: all 0.2s;
     }
     .phone-frame > * { pointer-events: auto; }
 
-    /* حاوية المحتوى (فيديو + كارد) */
+    /* حاوية المحتوى (فيديو + كارد) - عمودية بارتفاع 100% */
     .app-inner {
       width: 100%;
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;  /* المحتوى يبدأ من الأعلى */
-      gap: 6px;                    /* مسافة صغيرة بين الفيديو والكارد */
-      overflow: hidden;
+      gap: 6px;                /* مسافة صغيرة بين الفيديو والكارد */
       border-radius: 28px;
+      overflow: hidden;
       background: transparent;
     }
 
-    /* ── مشغل الفيديو (يعلو) ── */
+    /* ── مشغل الفيديو: يأخذ كل المساحة المتبقية ── */
     .video-stage {
       position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
+      flex: 1;                 /* يمتد لملء الفراغ حتى الكارد */
+      min-height: 0;           /* مهم لمنع التجاوز */
       background: #000;
       border-radius: 18px;
       overflow: hidden;
       box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-      flex-shrink: 0;
     }
     #mainVideo {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: cover;       /* يغطي المنطقة بالكامل (قد يُقص) */
       display: block;
     }
     .video-scrim {
@@ -189,10 +186,10 @@
     @keyframes fadeIn { from{ opacity:0; transform:translate(-50%, 6px); } to{ opacity:1; transform:translate(-50%,0); } }
     .sound-fallback i { color: var(--horizon); }
 
-    /* ── الكارد السفلي (يلي الفيديو بمسافة بسيطة) ── */
+    /* ── الكارد السفلي (في الأسفل، بارتفاع تلقائي) ── */
     .sheet {
       width: 100%;
-      flex-shrink: 0;
+      flex-shrink: 0;          /* يمنع الانكماش */
       pointer-events: none;
     }
     .sheet-inner {
@@ -305,7 +302,7 @@
     }
     .replay-link:hover { color: var(--text); }
 
-    /* تحسينات للشاشات الصغيرة جداً */
+    /* تحسينات للشاشات الصغيرة */
     @media (max-width: 400px) {
       .phone-frame { max-width: 340px; border-radius: 30px; padding: 8px 4px; }
       .board-seg { padding: 4px 8px; font-size: .5rem; }
@@ -314,7 +311,6 @@
     @media (min-width: 600px) {
       .phone-frame { max-width: 420px; }
     }
-    /* تسهيل الوصول */
     a:focus-visible, button:focus-visible {
       outline: 2px solid var(--runway);
       outline-offset: 2px;
@@ -328,7 +324,7 @@
   <!-- إطار الهاتف الطويل -->
   <div class="phone-frame">
     <div class="app-inner">
-      <!-- مشغل الفيديو -->
+      <!-- مشغل الفيديو (يمتد لأسفل حتى الكارد) -->
       <div class="video-stage">
         <video id="mainVideo" playsinline webkit-playsinline preload="auto">
           <source src="open_video.mp4" type="video/mp4">
@@ -351,7 +347,7 @@
         </div>
       </div>
 
-      <!-- الكارد السفلي (يأتي بعد الفيديو بمسافة 6px) -->
+      <!-- الكارد السفلي (ثابت في الأسفل) -->
       <div class="sheet">
         <div class="sheet-inner">
           <div class="sheet-grip"></div>
@@ -383,7 +379,6 @@
                 <div class="ready-sub">حمّل التطبيق الآن وابدأ رحلتك</div>
               </div>
             </div>
-            <!-- ⬇️ ضع رابط تحميل التطبيق هنا ⬇️ -->
             <a href="#" id="downloadLink" class="download-btn" target="_blank" rel="noopener">
               <i class="fas fa-arrow-down-to-line"></i>
               تحميل التطبيق
